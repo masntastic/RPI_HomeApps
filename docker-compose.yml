@@ -1,0 +1,35 @@
+version: '3'
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=ping
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  ping_monitor:
+    image: python:3.9
+    container_name: ping_monitor
+    volumes:
+      - ./ping_monitor:/usr/src/app
+    working_dir: /usr/src/app
+    command: ["python", "ping_monitor.py"]
+    depends_on:
+      - influxdb
+
+volumes:
+  influxdb_data:
+  grafana_data:
