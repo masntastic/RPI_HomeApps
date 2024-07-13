@@ -29,6 +29,8 @@ services:
     command: ["python", "ping_monitor.py"]
     depends_on:
       - influxdb
+    build:
+      context: ./ping_monitor
 
 volumes:
   influxdb_data:
