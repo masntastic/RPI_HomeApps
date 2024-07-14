@@ -1,14 +1,19 @@
 version: '3'
 services:
   influxdb:
-    image: influxdb:latest
+    image: influxdb:2.0
     container_name: influxdb
     ports:
       - "8086:8086"
     volumes:
       - influxdb_data:/var/lib/influxdb
     environment:
-      - INFLUXDB_DB=ping
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin_password
+      - DOCKER_INFLUXDB_INIT_ORG=my-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-token
 
   grafana:
     image: grafana/grafana:latest
@@ -21,7 +26,7 @@ services:
       - grafana_data:/var/lib/grafana
 
   ping_monitor:
-    image: python:3.9
+    build: ./ping_monitor
     container_name: ping_monitor
     volumes:
       - ./ping_monitor:/usr/src/app
@@ -29,8 +34,6 @@ services:
     command: ["python", "ping_monitor.py"]
     depends_on:
       - influxdb
-    build:
-      context: ./ping_monitor
 
 volumes:
   influxdb_data:

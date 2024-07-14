@@ -1,55 +1,48 @@
+import logging
+from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client.client.write_api import SYNCHRONOUS
 import os
 import time
 import subprocess
-from influxdb import InfluxDBClient
 
-# InfluxDB settings
-INFLUXDB_ADDRESS = 'influxdb'
-INFLUXDB_PORT = 8086
-INFLUXDB_USER = 'root'
-INFLUXDB_PASSWORD = 'root'
-INFLUXDB_DATABASE = 'ping'
-
-# Ping settings
-HOST = "8.8.8.8"
-PING_INTERVAL = 5
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def init_influxdb():
-    client = InfluxDBClient(INFLUXDB_ADDRESS, INFLUXDB_PORT, INFLUXDB_USER, INFLUXDB_PASSWORD, None)
-    databases = client.get_list_database()
-    if not any(db['name'] == INFLUXDB_DATABASE for db in databases):
-        client.create_database(INFLUXDB_DATABASE)
-    client.switch_database(INFLUXDB_DATABASE)
-    return client
+    url = "http://influxdb:8086"
+    token = "my-token"
+    org = "my-org"
+    bucket = "my-bucket"
 
-def ping(host):
-    response = subprocess.run(['ping', '-c', '1', host], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if response.returncode == 0:
-        ping_time = float(response.stdout.decode().split('time=')[1].split(' ms')[0])
-        return ping_time, 0
-    else:
-        return None, 1
+    client = InfluxDBClient(url=url, token=token, org=org)
+    write_api = client.write_api(write_options=SYNCHRONOUS)
+    
+    logging.info('Initialized InfluxDB client')
+    return client, write_api, bucket
 
 def main():
-    client = init_influxdb()
-    while True:
-        ping_time, packet_loss = ping(HOST)
-        timestamp = int(time.time() * 1000000000)
-        json_body = [
-            {
-                "measurement": "ping",
-                "tags": {
-                    "host": HOST
-                },
-                "time": timestamp,
-                "fields": {
-                    "response_time": ping_time,
-                    "packet_loss": packet_loss
-                }
-            }
-        ]
-        client.write_points(json_body)
-        time.sleep(PING_INTERVAL)
+    logging.info('Starting the ping monitor script')
+    client, write_api, bucket = init_influxdb()
 
-if __name__ == '__main__':
+    while True:
+        try:
+            logging.debug('Executing ping command')
+            response = subprocess.run(['ping', '-c', '1', '8.8.8.8'], stdout=subprocess.PIPE)
+            output = response.stdout.decode()
+            logging.debug(f'Ping output: {output}')
+            if "1 packets transmitted, 1 received" in output:
+                latency = float(output.split('time=')[1].split(' ')[0])
+                point = Point("ping").field("latency", latency).time(time.time_ns(), WritePrecision.NS)
+                write_api.write(bucket=bucket, record=point)
+                logging.info(f'Ping successful: latency {latency} ms')
+            else:
+                point = Point("ping").field("latency", float('inf')).time(time.time_ns(), WritePrecision.NS)
+                write_api.write(bucket=bucket, record=point)
+                logging.warning('Ping failed: packet loss')
+        except Exception as e:
+            logging.error(f"Error: {e}")
+
+        time.sleep(5)
+
+if __name__ == "__main__":
     main()
