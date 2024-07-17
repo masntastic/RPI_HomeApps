@@ -40,6 +40,7 @@ services:
     container_name: mosquitto
     ports:
       - "1883:1883"
+      - "9001:9001"  # WebSockets (optional, remove if not needed)
     volumes:
       - mosquitto_data:/mosquitto/data
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
@@ -57,4 +58,3 @@ volumes:
   influxdb_data:
   grafana_data:
   mosquitto_data:
-  mosquitto_conf:
