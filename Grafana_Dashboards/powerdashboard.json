@@ -1,0 +1,591 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 2,
+    "links": [],
+    "panels": [
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "cds1cpc57fe2oc"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "watt"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "percentChangeColorMode": "standard",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "text": {},
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "11.1.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "cds1cpc57fe2oc"
+            },
+            "query": "from(bucket: \"power-bucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mqtt_consumer\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"DWS74_Power_curr\")\r\n  |> last()\r\n",
+            "refId": "A"
+          }
+        ],
+        "title": "Current Watt",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "cds1cpc57fe2oc"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "#377113",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "watt"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 3,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "percentChangeColorMode": "standard",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "11.1.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "cds1cpc57fe2oc"
+            },
+            "query": "from(bucket: \"power-bucket\")\r\n  |> range(start: -30d)  // Adjust the time range as needed\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mqtt_consumer\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"DWS74_Power_curr\")\r\n  |> filter(fn: (r) => r[\"_value\"] >= 40.0 and r[\"_value\"] <= 280.0)\r\n  |> mean(column: \"_value\")\r\n  |> yield(name: \"average_idle_power\")\r\n",
+            "refId": "A"
+          }
+        ],
+        "title": "Avg. Idle Watt",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "cds1cpc57fe2oc"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "green",
+              "mode": "fixed",
+              "seriesBy": "last"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 41,
+              "gradientMode": "hue",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 300
+                },
+                {
+                  "color": "orange",
+                  "value": 2000
+                },
+                {
+                  "color": "semi-dark-red",
+                  "value": 4000
+                }
+              ]
+            },
+            "unit": "watt"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "DWS74_Power_curr {host=\"941b48644dfb\", topic=\"tele/tasmota_4CD7DE/SENSOR\"}"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Watt"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 16,
+          "w": 24,
+          "x": 0,
+          "y": 8
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "11.1.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "cds1cpc57fe2oc"
+            },
+            "query": "from(bucket: \"power-bucket\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mqtt_consumer\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"DWS74_Power_curr\")\r\n",
+            "refId": "A"
+          }
+        ],
+        "title": "Watt over time",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "cds1cpc57fe2oc"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "yellow",
+              "mode": "fixed"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineWidth": 1,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "decimals": 2,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green"
+                }
+              ]
+            },
+            "unit": "kwatth"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "DWS74_Total {host=\"941b48644dfb\", topic=\"tele/tasmota_4CD7DE/SENSOR\"}"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "kWh"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        },
+        "id": 4,
+        "options": {
+          "barRadius": 0,
+          "barWidth": 0.97,
+          "fullHighlight": false,
+          "groupWidth": 0.7,
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "orientation": "auto",
+          "showValue": "auto",
+          "stacking": "none",
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "xTickLabelRotation": 0,
+          "xTickLabelSpacing": 100
+        },
+        "pluginVersion": "11.1.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "cds1cpc57fe2oc"
+            },
+            "query": "from(bucket: \"power-bucket\")\r\n  |> range(start: -1d)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mqtt_consumer\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"DWS74_Total\")\r\n  |> aggregateWindow(every: 1h, fn: max, createEmpty: false)\r\n  |> difference()\r\n  |> yield(name: \"hourly_energy_consumption\")\r\n",
+            "refId": "A"
+          }
+        ],
+        "title": "kWh Consumption per hour",
+        "type": "barchart"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "cds1cpc57fe2oc"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineWidth": 1,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green"
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "currencyEUR"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "DWS74_Total {host=\"941b48644dfb\", topic=\"tele/tasmota_4CD7DE/SENSOR\"}"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Euro"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 36
+        },
+        "id": 5,
+        "options": {
+          "barRadius": 0,
+          "barWidth": 0.97,
+          "fullHighlight": false,
+          "groupWidth": 0.7,
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "orientation": "auto",
+          "showValue": "auto",
+          "stacking": "none",
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "xTickLabelRotation": 0,
+          "xTickLabelSpacing": 0
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "cds1cpc57fe2oc"
+            },
+            "query": "from(bucket: \"power-bucket\")\r\n  |> range(start: -30d)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mqtt_consumer\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"DWS74_Total\")\r\n  |> aggregateWindow(every: 1d, fn: max, createEmpty: false)\r\n  |> difference()\r\n  |> map(fn: (r) => ({ r with _value: (r._value * 0.3007) + 0.010 }))\r\n  |> yield(name: \"daily_energy_cost\")",
+            "refId": "A"
+          }
+        ],
+        "title": "Stromkosten pro Tag",
+        "type": "barchart"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "cds1cpc57fe2oc"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green"
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "_value {_field=\"DWS74_Total\", _start=\"1970-01-01 00:00:00 +0000 UTC\", _stop=\"2024-07-21 11:09:00.778718644 +0000 UTC\", host=\"941b48644dfb\", topic=\"tele/tasmota_4CD7DE/SENSOR\"}"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Cost"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "_value {_field=\"DWS74_Total\", _start=\"1970-01-01 00:00:00 +0000 UTC\", _stop=\"2024-07-21 11:09:00.743928913 +0000 UTC\", host=\"941b48644dfb\", topic=\"tele/tasmota_4CD7DE/SENSOR\"}"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Days"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 45
+        },
+        "id": 6,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "percentChangeColorMode": "standard",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "11.1.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "cds1cpc57fe2oc"
+            },
+            "hide": false,
+            "query": "from(bucket: \"power-bucket\")\r\n  |> range(start: 0)  // Start from the beginning of your data collection\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mqtt_consumer\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"DWS74_Total\")\r\n  |> aggregateWindow(every: 1d, fn: max, createEmpty: false)\r\n  |> difference()\r\n  |> map(fn: (r) => ({ r with _value: 1 }))  // Replace each daily value with 1\r\n  |> sum(column: \"_value\")\r\n  |> yield(name: \"number_of_days\")\r\n",
+            "refId": "Number of Days"
+          },
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "cds1cpc57fe2oc"
+            },
+            "query": "from(bucket: \"power-bucket\")\r\n  |> range(start: 0)  // Start from the beginning of your data collection\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mqtt_consumer\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"DWS74_Total\")\r\n  |> aggregateWindow(every: 1d, fn: max, createEmpty: false)\r\n  |> difference()\r\n  |> map(fn: (r) => ({ r with _value: (r._value * 0.3007) + 0.010 }))\r\n  |> sum(column: \"_value\")\r\n  |> yield(name: \"total_energy_cost\")\r\n",
+            "refId": "Total Cost"
+          }
+        ],
+        "title": "Cost so far",
+        "type": "stat"
+      }
+    ],
+    "refresh": "5s",
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "PowerData",
+    "uid": "dds1dmx4wpq0wb",
+    "version": 16,
+    "weekStart": ""
+  }
